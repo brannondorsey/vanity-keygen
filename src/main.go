@@ -9,7 +9,10 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sync/atomic"
 	"time"
+
+	human "github.com/dustin/go-humanize"
 )
 
 type keyPair struct {
@@ -17,7 +20,22 @@ type keyPair struct {
 	Private []byte
 }
 
-func getFindKeyFunc(curve elliptic.Curve, needle string, matchCase bool, matchLocation string, ch chan *keyPair, thread int) func() {
+func printKeySearchesPerSecond(opsCounter *int64) {
+	lastOpsCount := atomic.LoadInt64(opsCounter)
+	seconds := uint64(0)
+	for {
+		time.Sleep(time.Second)
+		latestOpsCount := atomic.LoadInt64(opsCounter)
+		fmt.Printf("[VERBOSE] %s key searches per second\n", human.Comma(latestOpsCount-lastOpsCount))
+		if seconds%10 == 0 && seconds != 0 {
+			fmt.Printf("[VERBOSE] %s total key searches so far\n", human.Comma(latestOpsCount))
+		}
+		lastOpsCount = latestOpsCount
+		seconds++
+	}
+}
+
+func getFindKeyFunc(curve elliptic.Curve, needle string, matchCase bool, matchLocation string, ch chan *keyPair, thread int, opsCounter *int64) func() {
 
 	needleLen := len(needle)
 	if !matchCase {
@@ -26,6 +44,7 @@ func getFindKeyFunc(curve elliptic.Curve, needle string, matchCase bool, matchLo
 
 	return func() {
 		for i := 1; true; i++ {
+			atomic.AddInt64(opsCounter, 1)
 			private, x, y, _ := elliptic.GenerateKey(curve, rand.Reader)
 			public := elliptic.Marshal(curve, x, y)
 			haystack := base64.StdEncoding.EncodeToString(public)
@@ -61,6 +80,7 @@ type Arguments struct {
 	MatchLocation string
 	CurveName     string
 	Needle        string
+	Verbose       bool
 }
 
 func parseArgs() Arguments {
@@ -69,6 +89,7 @@ func parseArgs() Arguments {
 	curveName := flag.String("curve", "p256", "The name of the curve to generate keys for. Accepted values include \"p224\", \"p256\", \"p384\", \"p521\".")
 	matchCase := flag.Bool("match-case", false, "Enable strict case matching. This will dramatically increase the search time.")
 	matchLocation := flag.String("match-location", "beginning", "The location of the search string in the generated key. Accepted values include \"beginning\", \"end\", \"anywhere\"")
+	verbose := flag.Bool("verbose", false, "Print verbose output")
 	flag.Usage = func() {
 		fmt.Printf("Usage: %s [OPTIONS] <search-string> ...\n", os.Args[0])
 		flag.PrintDefaults()
@@ -94,6 +115,7 @@ func parseArgs() Arguments {
 		MatchLocation: *matchLocation,
 		CurveName:     *curveName,
 		Needle:        *needle,
+		Verbose:       *verbose,
 	}
 }
 
@@ -118,8 +140,12 @@ func main() {
 	fmt.Printf("[INFO] String matching \"%s\" in location: %s\n", args.Needle, args.MatchLocation)
 	fmt.Printf("[INFO] Strict case matching: %t\n", args.MatchCase)
 	ch := make(chan *keyPair)
+	var opsCounter int64
+	if args.Verbose {
+		go printKeySearchesPerSecond(&opsCounter)
+	}
 	for thread := 1; thread < args.NumThreads+1; thread++ {
-		go getFindKeyFunc(curve, args.Needle, args.MatchCase, args.MatchLocation, ch, thread)()
+		go getFindKeyFunc(curve, args.Needle, args.MatchCase, args.MatchLocation, ch, thread, &opsCounter)()
 	}
 	key := <-ch
 	fmt.Printf("[INFO] Match found in %s\n", time.Since(start))
