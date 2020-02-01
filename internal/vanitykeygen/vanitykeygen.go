@@ -4,7 +4,6 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"encoding/base64"
-	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -14,7 +13,14 @@ import (
 	"time"
 
 	human "github.com/dustin/go-humanize"
+	flag "github.com/spf13/pflag"
 	"gitlab.com/NebulousLabs/fastrand"
+)
+
+var (
+	VERSION      string
+	VERSION_LONG string
+	BUILD_DATE   string
 )
 
 type keyPair struct {
@@ -77,7 +83,7 @@ func getFindKeyFunc(curve elliptic.Curve, needle string, matchCase bool, matchLo
 }
 
 type arguments struct {
-	NumThreads    int
+	Concurrency   int
 	MatchCase     bool
 	MatchLocation string
 	CurveName     string
@@ -88,15 +94,17 @@ type arguments struct {
 
 func parseArgs() arguments {
 	var needle *string
-	numThreads := flag.Int("threads", runtime.NumCPU(), "The number of threads to use to perform the search. Default 1 per CPU.")
-	curveName := flag.String("curve", "p256", "The name of the curve to generate keys for. Accepted values include \"p224\", \"p256\", \"p384\", \"p521\".")
+	curveName := flag.StringP("curve", "c", "p256", "The name of the curve to generate keys for. Accepted values include \"p224\", \"p256\", \"p384\", \"p521\".")
+	concurrency := flag.IntP("concurrency", "t", runtime.NumCPU(), "The number of concurrent goroutines to use to perform the search. Default 1 per CPU.")
+	insecure := flag.BoolP("insecure", "i", false, "Use the unvetted fastrand library for cryptographic randomness (https://gitlab.com/NebulousLabs/fastrand)")
+	help := flag.BoolP("help", "h", false, "Show this screen.")
 	matchCase := flag.Bool("match-case", false, "Enable strict case matching. This will dramatically increase the search time.")
 	matchLocation := flag.String("match-location", "beginning", "The location of the search string in the generated key. Accepted values include \"beginning\", \"end\", \"anywhere\"")
-	insecure := flag.Bool("insecure", false, "Use the unvetted fastrand library for cryptographic randomness (https://gitlab.com/NebulousLabs/fastrand)")
 	verbose := flag.Bool("verbose", false, "Print verbose output")
 	flag.Usage = func() {
 		fmt.Printf("Usage: %s [OPTIONS] <search-string> ...\n", os.Args[0])
 		flag.PrintDefaults()
+		fmt.Printf("Version: %s (built %s)\n", VERSION_LONG, BUILD_DATE)
 	}
 	flag.Parse()
 	if !(*curveName == "p224" || *curveName == "p256" || *curveName == "p384" || *curveName == "p521") {
@@ -107,14 +115,14 @@ func parseArgs() arguments {
 		fmt.Printf("[ERROR] Invalid match location \"%s\\n", *matchLocation)
 		os.Exit(1)
 	}
-	if flag.NArg() != 1 {
+	if flag.NArg() != 1 || *help {
 		flag.Usage()
 		os.Exit(1)
 	} else {
 		needle = &flag.Args()[0]
 	}
 	return arguments{
-		NumThreads:    *numThreads,
+		Concurrency:   *concurrency,
 		MatchCase:     *matchCase,
 		MatchLocation: *matchLocation,
 		CurveName:     *curveName,
@@ -141,7 +149,7 @@ func Run() {
 	args := parseArgs()
 	curve := getCurve(args.CurveName)
 	start := time.Now()
-	fmt.Printf("[INFO] Generating %s key pair using %d threads\n", args.CurveName, args.NumThreads)
+	fmt.Printf("[INFO] Generating %s key pair using %d threads\n", args.CurveName, args.Concurrency)
 	fmt.Printf("[INFO] String matching \"%s\" in location: %s\n", args.Needle, args.MatchLocation)
 	fmt.Printf("[INFO] Strict case matching: %t\n", args.MatchCase)
 	ch := make(chan *keyPair)
@@ -156,7 +164,7 @@ func Run() {
 	if args.Verbose {
 		go printKeySearchesPerSecond(&opsCounter)
 	}
-	for thread := 1; thread < args.NumThreads+1; thread++ {
+	for thread := 1; thread < args.Concurrency+1; thread++ {
 		go getFindKeyFunc(curve, args.Needle, args.MatchCase, args.MatchLocation, ch, thread, randReader, &opsCounter)()
 	}
 	key := <-ch
