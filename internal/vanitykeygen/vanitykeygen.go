@@ -1,4 +1,4 @@
-package main
+package vanitykeygen
 
 import (
 	"crypto/elliptic"
@@ -76,7 +76,7 @@ func getFindKeyFunc(curve elliptic.Curve, needle string, matchCase bool, matchLo
 	}
 }
 
-type Arguments struct {
+type arguments struct {
 	NumThreads    int
 	MatchCase     bool
 	MatchLocation string
@@ -86,7 +86,7 @@ type Arguments struct {
 	Verbose       bool
 }
 
-func parseArgs() Arguments {
+func parseArgs() arguments {
 	var needle *string
 	numThreads := flag.Int("threads", runtime.NumCPU(), "The number of threads to use to perform the search. Default 1 per CPU.")
 	curveName := flag.String("curve", "p256", "The name of the curve to generate keys for. Accepted values include \"p224\", \"p256\", \"p384\", \"p521\".")
@@ -113,7 +113,7 @@ func parseArgs() Arguments {
 	} else {
 		needle = &flag.Args()[0]
 	}
-	return Arguments{
+	return arguments{
 		NumThreads:    *numThreads,
 		MatchCase:     *matchCase,
 		MatchLocation: *matchLocation,
@@ -137,7 +137,7 @@ func getCurve(name string) elliptic.Curve {
 	}
 }
 
-func main() {
+func Run() {
 	args := parseArgs()
 	curve := getCurve(args.CurveName)
 	start := time.Now()
