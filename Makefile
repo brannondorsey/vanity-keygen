@@ -1,5 +1,5 @@
 NAME := vanity-keygen
-VERSION := v0.1.0
+VERSION := $(shell git tag | tail -n 1)
 BUILD_STRING := $(shell git log --pretty=format:'%h' -n 1)
 VERSION_LONG := $(NAME) version $(VERSION)+$(BUILD_STRING)
 BUILD_DATE := $(shell date -u)
@@ -34,3 +34,13 @@ clean:
 	go clean
 	rm -rf bin/*
 	touch bin/.gitkeep
+
+ifneq (,$(findstring snapshot,$(VERSION)))
+snapshot:
+	echo "The latest tagged version is a snapshot. Not tagging."
+else
+snapshot:
+	echo "The latest version tagged is not a snapshot. Tagging!"
+	git tag $(VERSION)-snapshot
+	git push --tags
+endif
