@@ -26,7 +26,7 @@ jobs:
     - name: Get dependencies
       run: make deps
       env:
-        GOPATH: $GOPATH:./
+        GOPATH: $GOPATH:$(pwd)
 
     - name: Build for all platforms
       run: make build-all
