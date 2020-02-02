@@ -5,10 +5,10 @@ VERSION_LONG := $(NAME) version $(VERSION)+$(BUILD_STRING)
 BUILD_DATE := $(shell date -u)
 
 SRC_FILES := $(shell find . -type f -name *.go)
-SRC_DIRS := ./cmd/vanity-keygen/ ./internal/vanitykeygen/
+SRC_DIRS := ./cmd/vanity-keygen/ ./pkg/vanitykeygen/
 MAIN_SRC := cmd/vanity-keygen/main.go
 
-LDFLAGS := "-X \"github.com/brannondorsey/vanity-keygen/internal/vanitykeygen.VERSION=$(VERSION)\" -X \"github.com/brannondorsey/vanity-keygen/internal/vanitykeygen.VERSION_LONG=$(VERSION_LONG)\" -X \"github.com/brannondorsey/vanity-keygen/internal/vanitykeygen.BUILD_DATE=$(BUILD_DATE)\""
+LDFLAGS := "-X \"github.com/brannondorsey/vanity-keygen/pkg/vanitykeygen.VERSION=$(VERSION)\" -X \"github.com/brannondorsey/vanity-keygen/pkg/vanitykeygen.VERSION_LONG=$(VERSION_LONG)\" -X \"github.com/brannondorsey/vanity-keygen/pkg/vanitykeygen.BUILD_DATE=$(BUILD_DATE)\""
 
 .PHONY: all deps clean install
 

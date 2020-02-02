@@ -5,7 +5,7 @@ name: Go
 #       - v*
 on:
   push:
-    branches: 
+    branches:
       - master
 jobs:
 
@@ -22,16 +22,12 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
-    
-    - name: Check directory
-      run: echo $(pwd)
 
     - name: Get dependencies
       run: make deps
 
     - name: Build for all platforms
       run: make build-all
-    
+
     - name: Snapshot
       run: make snapshot
-      
