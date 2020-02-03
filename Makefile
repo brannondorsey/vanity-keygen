@@ -51,4 +51,6 @@ snapshot:
 	echo "The latest version tagged is not a snapshot. Tagging!"
 	git tag $(VERSION)-snapshot
 	git push --tags
+	curl --data \
+		"{\"tag_name\": \"$VERSION\",\"target_commitish\": \"master\",\"name\": \"$VERSION\",\"body\": \"Release of version $VERSION\",\"draft\": false,\"prerelease\": true}" "https://api.github.com/repos/brannondorsey/vanity-keygen/releases?access_token=$GITHUB_TOKEN"
 endif

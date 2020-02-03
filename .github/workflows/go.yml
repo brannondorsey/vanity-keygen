@@ -32,7 +32,7 @@ jobs:
       working-directory: ./vanity-keygen
       run: make build-all
 
-    - name: Snapshot
+    - name: Snapshot and Release
       working-directory: ./vanity-keygen
       run: make snapshot
 
