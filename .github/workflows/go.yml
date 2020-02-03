@@ -18,7 +18,10 @@ jobs:
 
     - name: Check out code
       run: |
-        git clone https://github.com/brannondorsey/vanity-keygen
+        git clone https://brannondorsey:$GITHUB_TOKEN@github.com/brannondorsey/vanity-keygen
+        echo git remote -v
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Get dependencies
       working-directory: ./vanity-keygen
