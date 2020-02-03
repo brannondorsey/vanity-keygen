@@ -32,9 +32,9 @@ jobs:
       working-directory: ./vanity-keygen
       run: make build-all
 
-    - name: Snapshot and Release
-      working-directory: ./vanity-keygen
-      run: make snapshot
+    # - name: Snapshot and Release
+    #   working-directory: ./vanity-keygen
+    #   run: make snapshot
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v1
