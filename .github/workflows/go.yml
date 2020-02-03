@@ -1,8 +1,8 @@
 name: Go
 on:
-  push:
-    branches:
-      - master
+  release:
+    type:
+      - published
 jobs:
 
   build-and-publish:
@@ -32,17 +32,13 @@ jobs:
       working-directory: ./vanity-keygen
       run: make build-all
 
-    # - name: Snapshot and Release
-    #   working-directory: ./vanity-keygen
-    #   run: make snapshot
+    - name: Snapshot and Release
+      working-directory: ./vanity-keygen
+      run: make snapshot
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v1
+      uses: skx/github-action-publish-binaries@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: macos.zip
-        path: vanity-keygen/bin/macos.zip
-      # uses: skx/github-action-publish-binaries@master
-      # env:
-      #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # with:
-      #   args: 'vanity-keygen/bin/*.zip vanity-keygen/bin/*.tar.gz'
+        args: 'vanity-keygen/bin/*.zip vanity-keygen/bin/*.tar.gz'
