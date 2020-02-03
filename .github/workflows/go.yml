@@ -1,7 +1,8 @@
 name: Go
 on:
   release:
-    type: created
+    type:
+      - created
 jobs:
 
   build-and-publish:
