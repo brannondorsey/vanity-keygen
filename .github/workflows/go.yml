@@ -37,7 +37,7 @@ jobs:
       run: make snapshot
 
     - name: Upload artifacts
-    - uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v1
       with:
         name: macos.zip
         path: vanity-keygen/bin/macos.zip
