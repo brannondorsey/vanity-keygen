@@ -26,6 +26,10 @@ build-all: $(SRC_FILES)
 	GOOS=linux GOARCH=arm64 go build -o bin/linux-arm64/$(NAME) $(MAIN_SRC)
 	GOOS=darwin GOARCH=amd64 go build -o bin/macos/$(NAME) $(MAIN_SRC)
 	GOOS=windows GOARCH=amd64 go build -o bin/windows/$(NAME) $(MAIN_SRC)
+	tar czf bin/linux-arm64.tar.gz bin/linux-x64/
+	tar czf bin/linux-arm64.tar.gz bin/linux-arm64/
+	zip -r -9 bin/macos.zip bin/macos/
+	zip -r -9 bin/windows.zip bin/windows/
 
 deps:
 	go get \
