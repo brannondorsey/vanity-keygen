@@ -28,7 +28,11 @@ build-all: $(SRC_FILES)
 	GOOS=windows GOARCH=amd64 go build -o bin/windows/$(NAME) $(MAIN_SRC)
 
 deps:
-	go get $(SRC_DIRS)
+	go get \
+		github.com/brannondorsey/vanity-keygen/pkg/vanitykeygen \
+		github.com/dustin/go-humanize \
+		github.com/spf13/pflag \
+		gitlab.com/NebulousLabs/fastrand
 
 clean:
 	go clean
