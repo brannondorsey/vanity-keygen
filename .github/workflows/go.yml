@@ -42,4 +42,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        args: 'bin/*.zip bin/*.tar.gz'
+        args: 'vanity-keygen/bin/*.zip vanity-keygen/bin/*.tar.gz'
