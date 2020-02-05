@@ -22,6 +22,10 @@ Base64(concat(X, Y))
 
 Where `x` and `y` are the points of a public key and `concat(x, y)` is the uncompressed form of the key specified in section 4.3.6 of ANSI X9.62. Finally the uncompressed version of the key is encoded in Base64 using for portability, and to make a wide variety of characters available for string matching.
 
+## Download
+
+Pre-compiled binaries are available for Linux (x64 and ARM), MacOS, and Windows can be downloaded for from the latest [release page](https://github.com/brannondorsey/vanity-keygen/releases/latest).
+
 ## Usage
 
 In its simplest form, the tool can be invoked with `vanity-keygen <search-string>`. However, the flags listed below can be used to tune the behavior of the key search.
