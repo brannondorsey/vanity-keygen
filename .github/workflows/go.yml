@@ -1,44 +1,49 @@
-name: Go
-on:
-  release:
-    type:
-      - published
-jobs:
+## Unused, because I was having an issue where the on.release.type.* would trigger three
+## concurrent workflows at once. Should be ready to come back and enable if that problem
+## get solved / I ever have interest again. Disabling for now. Manual releases can be
+## made via git tag.
 
-  build-and-publish:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
+# name: Go
+# on:
+#   release:
+#     type:
+#       - published
+# jobs:
 
-    - name: Set up Go 1.13
-      uses: actions/setup-go@v1
-      with:
-        go-version: 1.13
-      id: go
+#   build-and-publish:
+#     name: Build
+#     runs-on: ubuntu-latest
+#     steps:
 
-    - name: Check out code
-      run: |
-        git clone https://brannondorsey:$GITHUB_TOKEN@github.com/brannondorsey/vanity-keygen
-        echo git remote -v
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#     - name: Set up Go 1.13
+#       uses: actions/setup-go@v1
+#       with:
+#         go-version: 1.13
+#       id: go
 
-    - name: Get dependencies
-      working-directory: ./vanity-keygen
-      run: |
-        make deps
+#     - name: Check out code
+#       run: |
+#         git clone https://brannondorsey:$GITHUB_TOKEN@github.com/brannondorsey/vanity-keygen
+#         echo git remote -v
+#       env:
+#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Build for all platforms
-      working-directory: ./vanity-keygen
-      run: make build-all
+#     - name: Get dependencies
+#       working-directory: ./vanity-keygen
+#       run: |
+#         make deps
 
-    - name: Snapshot and Release
-      working-directory: ./vanity-keygen
-      run: make snapshot
+#     - name: Build for all platforms
+#       working-directory: ./vanity-keygen
+#       run: make build-all
 
-    - name: Upload artifacts
-      uses: skx/github-action-publish-binaries@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        args: 'vanity-keygen/bin/*.zip vanity-keygen/bin/*.tar.gz'
+#     - name: Snapshot and Release
+#       working-directory: ./vanity-keygen
+#       run: make snapshot
+
+#     - name: Upload artifacts
+#       uses: skx/github-action-publish-binaries@master
+#       env:
+#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       with:
+#         args: 'vanity-keygen/bin/*.zip vanity-keygen/bin/*.tar.gz'
