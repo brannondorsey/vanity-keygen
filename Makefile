@@ -5,7 +5,6 @@ VERSION_LONG := $(NAME) version $(VERSION)+$(BUILD_STRING)
 BUILD_DATE := $(shell date -u)
 
 SRC_FILES := $(shell find . -type f -name *.go)
-SRC_DIRS := ./cmd/vanity-keygen/ ./pkg/vanitykeygen/
 MAIN_SRC := cmd/vanity-keygen/main.go
 
 LDFLAGS := "-X \"github.com/brannondorsey/vanity-keygen/pkg/vanitykeygen.VERSION=$(VERSION)\" -X \"github.com/brannondorsey/vanity-keygen/pkg/vanitykeygen.VERSION_LONG=$(VERSION_LONG)\" -X \"github.com/brannondorsey/vanity-keygen/pkg/vanitykeygen.BUILD_DATE=$(BUILD_DATE)\""
@@ -20,17 +19,20 @@ install: deps build
 build: $(SRC_FILES)
 	go build -ldflags=$(LDFLAGS) -o bin/$(NAME) $(MAIN_SRC)
 
-build-all: $(SRC_FILES)
-	mkdir -p bin/macos bin/linux-x64 bin/linux-arm64 bin/windows
-	GOOS=linux GOARCH=amd64 go build -o bin/linux-x64/$(NAME) $(MAIN_SRC)
-	GOOS=linux GOARCH=arm64 go build -o bin/linux-arm64/$(NAME) $(MAIN_SRC)
-	GOOS=darwin GOARCH=amd64 go build -o bin/macos/$(NAME) $(MAIN_SRC)
-	GOOS=windows GOARCH=amd64 go build -o bin/windows/$(NAME) $(MAIN_SRC)
-	tar czf bin/linux-arm64.tar.gz bin/linux-x64/
-	tar czf bin/linux-arm64.tar.gz bin/linux-arm64/
-	zip -r -9 bin/macos.zip bin/macos/
-	zip -r -9 bin/windows.zip bin/windows/
-	rm -rf bin/macos bin/linux-x64 bin/linux-arm64 bin/windows
+build-all: $(SRC_FILES) clean default
+	mkdir -p bin/$(NAME)-macos bin/$(NAME)-windows bin/$(NAME)-linux-x64 bin/$(NAME)-linux-arm7 bin/$(NAME)-linux-arm6
+	GOOS=darwin GOARCH=amd64 go build -ldflags=$(LDFLAGS) -o bin/$(NAME)-macos/$(NAME) $(MAIN_SRC)
+	GOOS=windows GOARCH=amd64 go build -ldflags=$(LDFLAGS) -o bin/$(NAME)-windows/$(NAME) $(MAIN_SRC)
+	GOOS=linux GOARCH=amd64 go build -ldflags=$(LDFLAGS) -o bin/$(NAME)-linux-x64/$(NAME) $(MAIN_SRC)
+	GOOS=linux GOARCH=arm GOARM=7 go build -ldflags=$(LDFLAGS) -o bin/$(NAME)-linux-arm7/$(NAME) $(MAIN_SRC)
+	GOOS=linux GOARCH=arm GOARM=6 go build -ldflags=$(LDFLAGS) -o bin/$(NAME)-linux-arm6/$(NAME) $(MAIN_SRC)
+	cd bin/ && \
+		tar czf $(NAME)-linux-x64.tar.gz $(NAME)-linux-x64/ && \
+		tar czf $(NAME)-linux-arm7.tar.gz $(NAME)-linux-arm7/ && \
+		tar czf $(NAME)-linux-arm6.tar.gz $(NAME)-linux-arm6/ && \
+		zip -r -9 $(NAME)-macos.zip $(NAME)-macos/ && \
+		zip -r -9 $(NAME)-windows.zip $(NAME)-windows/
+	rm -rf bin/$(NAME)-macos bin/$(NAME)-windows bin/$(NAME)-linux-x64 bin/$(NAME)-linux-arm7 bin/$(NAME)-linux-arm6
 
 deps:
 	go mod vendor
