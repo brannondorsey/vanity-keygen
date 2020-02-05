@@ -10,7 +10,7 @@ MAIN_SRC := cmd/vanity-keygen/main.go
 
 LDFLAGS := "-X \"github.com/brannondorsey/vanity-keygen/pkg/vanitykeygen.VERSION=$(VERSION)\" -X \"github.com/brannondorsey/vanity-keygen/pkg/vanitykeygen.VERSION_LONG=$(VERSION_LONG)\" -X \"github.com/brannondorsey/vanity-keygen/pkg/vanitykeygen.BUILD_DATE=$(BUILD_DATE)\""
 
-.PHONY: all deps clean install
+.PHONY: default deps clean install snapshot
 
 default: deps build
 
@@ -32,11 +32,7 @@ build-all: $(SRC_FILES)
 	zip -r -9 bin/windows.zip bin/windows/
 
 deps:
-	go get \
-		github.com/brannondorsey/vanity-keygen/pkg/vanitykeygen \
-		github.com/dustin/go-humanize \
-		github.com/spf13/pflag \
-		gitlab.com/NebulousLabs/fastrand
+	go mod vendor
 
 clean:
 	go clean
@@ -51,6 +47,4 @@ snapshot:
 	echo "The latest version tagged is not a snapshot. Tagging!"
 	git tag snapshot-$(VERSION)
 	git push --tags
-	# curl --data \
-	# 	"{\"tag_name\": \"$(VERSION)\",\"target_commitish\": \"master\",\"name\": \"$(VERSION)\",\"body\": \"Release of version $(VERSION)\",\"draft\": false,\"prerelease\": true}" "https://api.github.com/repos/brannondorsey/vanity-keygen/releases?access_token=$(shell env GITHUB_TOKEN)"
 endif
