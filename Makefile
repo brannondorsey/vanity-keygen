@@ -46,6 +46,6 @@ snapshot:
 else
 snapshot:
 	echo "The latest version tagged is not a snapshot. Tagging!"
-	git tag snapshot-$(VERSION)
+	git tag $(VERSION)-snapshot
 	git push --tags
 endif
