@@ -30,6 +30,7 @@ build-all: $(SRC_FILES)
 	tar czf bin/linux-arm64.tar.gz bin/linux-arm64/
 	zip -r -9 bin/macos.zip bin/macos/
 	zip -r -9 bin/windows.zip bin/windows/
+	rm -rf bin/macos bin/linux-x64 bin/linux-arm64 bin/windows
 
 deps:
 	go mod vendor
